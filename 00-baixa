@@ -1,0 +1,14 @@
+#!/bin/sh
+# © 2018-2019 Nelson A. de Oliveira <naoliv@gmail.com>
+
+wget -cr ftp://geoftp.ibge.gov.br/recortes_para_fins_estatisticos/malha_de_setores_censitarios/censo_2010/base_de_faces_de_logradouros
+
+if [ ! -d faces ]; then
+	mkdir faces
+fi
+
+for i in `find -name '*.zip'`; do
+	eatmydata nocache unzip -C -o -qq "$i" "*_face.*" -d faces
+done
+
+rm faces/*.png faces/*.xml

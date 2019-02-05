@@ -1,0 +1,175 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+# © 2018-2019 Nelson A. de Oliveira <naoliv@gmail.com>
+
+import re
+import sys
+try:
+    import psycopg2
+except:
+    sys.exit('Instalar "python-psycopg2"');
+
+trocas = {
+        'Abrao': u'Abrão',
+        'Adao': u'Adão',
+        'Alcantara': u'Alcântara',
+        'Alvaro': u'Álvaro',
+        'Amapa': u'Amapá',
+        'Angela': u'Ângela',
+        'Angelo': u'Ângelo',
+        'Antonio': u'Antônio',
+        'Apostolo': u'Apóstolo',
+        'Aragao': u'Aragão',
+        'Assuncao': u'Assunção',
+        'Aurelia': u'Aurélia',
+        'Barao': u'Barão',
+        'Br': 'BR',
+        'Br116': 'BR-116',
+        'Brasilia': u'Brasília',
+        'Cafe': u'Café',
+        'Camara': u'Câmara',
+        'Candido': u'Cândido',
+        'Capitao': u'Capitão',
+        'Cassia': u'Cássia',
+        'Ceara': u'Ceará',
+        'Chacara': u'Chácara',
+        'Cicero': u'Cícero',
+        'Comercio': u'Comércio',
+        'Conceicao': u'Conceição',
+        'Coracao': u'Coração',
+        'Cristovao': u'Cristóvão',
+        'Da': 'da',
+        'Damiao': u'Damião',
+        'Das': 'das',
+        'De': 'de',
+        'Diacono': u'Diácono',
+        'Do': 'do',
+        'Dos': 'dos',
+        'E': 'e',
+        'Efigenia': u'Efigênia',
+        'Epitacio': u'Epitácio',
+        'Estevao': u'Estevão',
+        'Farmaceutico': u'Farmacêutico',
+        'Fatima': u'Fátima',
+        'Fe': u'Fé',
+        'Feijo': u'Feijó',
+        'Florianopolis': u'Florianópolis',
+        'Galvao': u'Galvão',
+        'Gastao': u'Gastão',
+        'Gaviao': u'Gavião',
+        'Getulio': u'Getúlio',
+        'Goias': u'Goiás',
+        'Goncalo': u'Gonçalo',
+        'Goncalves': u'Gonçalves',
+        'Grao': u'Grão',
+        'Guimaraes': u'Guimarães',
+        'Ii': 'II',
+        'Iii': 'III',
+        'Inacio': u'Inácio',
+        'Independencia': u'Independência',
+        'Ines': u'Inês',
+        'Iraja': u'Irajá',
+        'Irma': u'Irmã',
+        'Iv': 'IV',
+        'Ix': 'IX',
+        'Januario': u'Januário',
+        'Jeronimo': u'Jerônimo',
+        'Jk': 'JK',
+        'Joao': u'João',
+        'Jose': u'José',
+        'Lazaro': u'Lázaro',
+        'Leao': u'Leão',
+        'Leitao': u'Leitão',
+        'Lourenco': u'Lourenço',
+        'Lucia': u'Lúcia',
+        'Maceio': u'Maceió',
+        'Magalhaes': u'Magalhães',
+        'Maranhao': u'Maranhão',
+        'Marques': u'Marquês',
+        'Maua': u'Mauá',
+        'Mendonca': u'Mendonça',
+        'Militao': u'Militão',
+        'Missionario': u'Missionário',
+        'Monica': u'Mônica',
+        'Muller': u'Müller',
+        'Nazare': u'Nazaré',
+        'Negrao': u'Negrão',
+        'Nobrega': u'Nóbrega',
+        'Osorio': u'Osório',
+        'Ou': 'ou',
+        'Paraiba': u'Paraíba',
+        'Parana': u'Paraná',
+        'Patria': u'Pátria',
+        'Pecanha': u'Peçanha',
+        'Perpetuo': u'Perpétuo',
+        'Piaui': u'Piauí',
+        'Pm': 'PM',
+        'Policia': u'Polícia',
+        'Praca': u'Praça',
+        'Rj': 'RJ',
+        'Rondonia': u'Rondônia',
+        'Rosario': u'Rosário',
+        'Salomao': u'Salomão',
+        'Sao': u'São',
+        'Sebastiao': u'Sebastião',
+        'Simao': u'Simão',
+        'Sinha': u'Sinhá',
+        'Sitio': u'Sítio',
+        'Sp': 'SP',
+        'Tamandare': u'Tamandaré',
+        'Thome': u'Thomé',
+        'Tome': u'Tomé',
+        'Tres': u'Três',
+        'Tristao': u'Tristão',
+        'Vi': 'VI',
+        'Vigario': u'Vigário',
+        'Vii': 'VII',
+        'Viii': 'VIII',
+        'Voluntario': u'Voluntário',
+        'Voluntarios': u'Voluntários',
+        'Xi': 'XI',
+        'Xii': 'XII',
+        'Xiii': 'XIII',
+        'Xiv': 'XIV',
+        'Xv': 'XV',
+        'Xvi': 'XVI',
+        'Xviii': 'XVIII',
+        'Xx': 'XX',
+        'Xxiii': 'XXIII',
+        'Xxviii': 'XXVIII',
+        }
+
+# nao é eficiente, mas faz o que precisa fazer; alguns nomes precisam de mais do que uma substituição
+def processa(nome):
+    for key in trocas:
+        nome = re.sub(r'\b%s\b' % key, trocas[key], nome)
+    return nome
+
+
+conexao = psycopg2.connect("dbname=ibge user=user password=pass")
+cursor = conexao.cursor()
+cursor.execute("SELECT * FROM faces WHERE nome IS NOT NULL")
+
+print "Senta que lá vem história... (é demorado)"
+
+for row in cursor:
+    try:
+        tmp = row[1].decode('utf-8')
+    except:
+        pass
+
+    tmp = u' '.join(tmp.split()).title()
+
+    c2 = conexao.cursor()
+
+    if ' Sem ' in tmp or 'Projetad' in tmp:
+        # nomes "Sem Nome", "Sem Denominação", "Rua Projetada", etc ficam todos sem nome
+        query = c2.mogrify("UPDATE faces SET nome = NULL WHERE ogc_fid = %i" % row[0])
+    else:
+        query = c2.mogrify("UPDATE faces SET nome = '%s' WHERE ogc_fid = %i" % (processa(tmp), row[0]))
+
+    c2.execute(query)
+    conexao.commit()
+    c2.close()
+
+conexao.close()

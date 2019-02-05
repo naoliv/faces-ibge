@@ -1,0 +1,17 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+# © 2018-2019 Nelson A. de Oliveira <naoliv@gmail.com>
+
+import psycopg2
+
+conexao = psycopg2.connect("dbname=db user=user password=pass")
+cursor = conexao.cursor()
+cursor.execute("SELECT * FROM faces WHERE nome IS NOT NULL")
+
+for row in cursor:
+    nome = row[1].split()
+
+    for i in nome:
+        print i
+
+conexao.close()

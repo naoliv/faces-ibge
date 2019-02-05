@@ -1,0 +1,14 @@
+#!/bin/sh
+# © 2018-2019 Nelson A. de Oliveira <naoliv@gmail.com>
+
+export SHAPE_ENCODING="ISO-8859-1"
+
+qtd=`ls faces/*face.shp | wc -l`
+count=1
+
+for f in faces/*face.shp; do
+	layer=`basename $f .shp`
+	echo "$count/$qtd"
+	eatmydata ogr2ogr -explodecollections -update -append -f "PostgreSQL" PG:"host=127.0.0.1 user=user dbname=ibge password=pass" -dialect SQLITE -sql "SELECT NM_TIPO_LO || ' ' || NM_TITULO_ || ' ' || NM_NOME_LO AS nome, GEOMETRY FROM \"$layer\"" -t_srs EPSG:4326 $f -nln faces
+	count=`expr $count + 1`
+done

@@ -2,8 +2,8 @@
 #-*- coding: utf-8 -*-
 # © 2018-2019 Nelson A. de Oliveira <naoliv@gmail.com>
 
-import re
 import sys
+
 try:
     import psycopg2
 except:
@@ -12,6 +12,8 @@ except:
 trocas = {
         'Abrao': u'Abrão',
         'Adao': u'Adão',
+        'Agua': u'Água',
+        'Aguas': u'Águas',
         'Alcantara': u'Alcântara',
         'Alvaro': u'Álvaro',
         'Amapa': u'Amapá',
@@ -20,6 +22,7 @@ trocas = {
         'Antonio': u'Antônio',
         'Apostolo': u'Apóstolo',
         'Aragao': u'Aragão',
+        'Ascencao': u'Ascenção',
         'Assuncao': u'Assunção',
         'Aurelia': u'Aurélia',
         'Barao': u'Barão',
@@ -38,6 +41,7 @@ trocas = {
         'Conceicao': u'Conceição',
         'Coracao': u'Coração',
         'Cristovao': u'Cristóvão',
+        'D\'Agua': u'd\'Água',
         'Da': 'da',
         'Damiao': u'Damião',
         'Das': 'das',
@@ -48,7 +52,10 @@ trocas = {
         'E': 'e',
         'Efigenia': u'Efigênia',
         'Epitacio': u'Epitácio',
+        'Espirito': u'Espírito',
         'Estevao': u'Estevão',
+        'Expedicionario': u'Expedicionário',
+        'Expedicionarios': u'Expedicionários',
         'Farmaceutico': u'Farmacêutico',
         'Fatima': u'Fátima',
         'Fe': u'Fé',
@@ -70,6 +77,7 @@ trocas = {
         'Ines': u'Inês',
         'Iraja': u'Irajá',
         'Irma': u'Irmã',
+        'Italia': u'Itália',
         'Iv': 'IV',
         'Ix': 'IX',
         'Januario': u'Januário',
@@ -97,6 +105,7 @@ trocas = {
         'Nobrega': u'Nóbrega',
         'Osorio': u'Osório',
         'Ou': 'ou',
+        'Paixao': u'Paixão',
         'Paraiba': u'Paraíba',
         'Parana': u'Paraná',
         'Patria': u'Pátria',
@@ -139,18 +148,30 @@ trocas = {
         'Xxviii': 'XXVIII',
         }
 
+remover = [' SEM ', ' Sem ', 'PROJETAD']
+
 # nao é eficiente, mas faz o que precisa fazer; alguns nomes precisam de mais do que uma substituição
 def processa(nome):
-    for key in trocas:
-        nome = re.sub(r'\b%s\b' % key, trocas[key], nome)
-    return nome
+
+    if nome in remover or nome.startswith('SEM '):
+        return None
+
+    saida = u''
+
+    for key in nome.title().split():
+        saida = saida + ' ' + trocas.get(key, key)
+
+    return saida.replace("'", "''")
 
 
 conexao = psycopg2.connect("dbname=ibge user=user password=pass")
 cursor = conexao.cursor()
-cursor.execute("SELECT * FROM faces WHERE nome IS NOT NULL")
 
 print "Senta que lá vem história... (é demorado)"
+
+cursor.execute("SELECT * FROM faces WHERE nome IS NOT NULL")
+
+c2 = conexao.cursor()
 
 for row in cursor:
     try:
@@ -158,18 +179,16 @@ for row in cursor:
     except:
         pass
 
-    tmp = u' '.join(tmp.split()).title()
+    tmp = processa(tmp)
 
-    c2 = conexao.cursor()
-
-    if ' Sem ' in tmp or 'Projetad' in tmp:
-        # nomes "Sem Nome", "Sem Denominação", "Rua Projetada", etc ficam todos sem nome
+    if tmp == None:
+        # vias "Sem Nome", "Sem Denominação", "Rua Projetada", etc ficam todas sem nome
         query = c2.mogrify("UPDATE faces SET nome = NULL WHERE ogc_fid = %i" % row[0])
     else:
-        query = c2.mogrify("UPDATE faces SET nome = '%s' WHERE ogc_fid = %i" % (processa(tmp), row[0]))
+        query = c2.mogrify("UPDATE faces SET nome = '%s' WHERE ogc_fid = %i" % (tmp, row[0]))
 
     c2.execute(query)
-    conexao.commit()
-    c2.close()
 
+conexao.commit()
+c2.close()
 conexao.close()

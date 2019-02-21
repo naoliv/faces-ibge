@@ -4,7 +4,7 @@
 
 import psycopg2
 
-conexao = psycopg2.connect("dbname=db user=user password=pass")
+conexao = psycopg2.connect("dbname=ibge user=user password=pass")
 cursor = conexao.cursor()
 cursor.execute("SELECT * FROM faces WHERE nome IS NOT NULL")
 

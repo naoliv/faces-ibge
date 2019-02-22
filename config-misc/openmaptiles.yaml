@@ -1,0 +1,19 @@
+tileset:
+  layers:
+    - layers/faces/faces.yaml
+  name: Nomes de ruas/faces de logradouros do IBGE
+  version: 3.9.0
+  id: faces
+  description: "Conjunto de dados de nomes de ruas/faces de logradouros do IBGE"
+  attribution: 'IBGE, OSM Brasil'
+  center: [-52.675, -14.55, 5]
+  bounds: [-72.95, -33.75, -32.40, 4.65]
+  maxzoom: 14
+  minzoom: 4
+  pixel_scale: 256
+  languages:
+    - pt # Portuguese, Latin
+  defaults:
+    srs: +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs
+    datasource:
+      srid: 4326

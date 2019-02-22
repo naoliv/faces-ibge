@@ -1,0 +1,14 @@
+layer:
+        id: "faces"
+        description: |
+                Nomes de ruas/faces de logradouros do IBGE.
+        buffer_size: 4
+        fields:
+                text:
+                        description: |
+                                Nome da rua.
+        datasource:
+                geometry_field: geometry
+                query: (SELECT geometry, nome FROM layer_faces(!bbox!, z(!scale_denominator!))) AS t
+schema:
+        - ./layer.sql

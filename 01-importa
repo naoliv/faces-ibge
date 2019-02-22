@@ -9,6 +9,6 @@ count=1
 for f in faces/*face.shp; do
 	layer=`basename $f .shp`
 	printf "$count/$qtd\r"
-	eatmydata ogr2ogr -explodecollections -update -append -f "PostgreSQL" PG:"host=127.0.0.1 user=user dbname=ibge password=pass" --config PG_USE_COPY YES -lco SPATIAL_INDEX=NONE -dialect SQLITE -sql "SELECT COALESCE(NM_TIPO_LO, '') || ' ' || COALESCE(NM_TITULO_, '') || ' ' || COALESCE(NM_NOME_LO, '') AS nome, GEOMETRY FROM \"$layer\"" -t_srs EPSG:4326 $f -nln faces
+	eatmydata ogr2ogr -explodecollections -update -append -f "PostgreSQL" PG:"host=127.0.0.1 user=user dbname=ibge password=pass" --config PG_USE_COPY YES -dialect SQLITE -sql "SELECT COALESCE(NM_TIPO_LO, '') || ' ' || COALESCE(NM_TITULO_, '') || ' ' || COALESCE(NM_NOME_LO, '') AS nome, GEOMETRY FROM \"$layer\"" -t_srs EPSG:4326 $f -nln faces
 	count=`expr $count + 1`
 done

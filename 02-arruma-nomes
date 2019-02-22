@@ -148,12 +148,10 @@ trocas = {
         'Xxviii': 'XXVIII',
         }
 
-remover = [' SEM ', ' Sem ', 'PROJETAD']
-
 # nao é eficiente, mas faz o que precisa fazer; alguns nomes precisam de mais do que uma substituição
 def processa(nome):
 
-    if nome in remover or nome.startswith('SEM '):
+    if ' SEM ' in nome or ' Sem ' in nome or ' sem ' in nome or 'PROJETAD' in nome or nome.startswith('SEM '):
         return None
 
     saida = u''

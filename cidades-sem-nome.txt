@@ -1,0 +1,4 @@
+Lista de cidades que não apresentam nomes de ruas.
+Apenas as cidades que foram verificadas nos dados originais do IBGE devem fazer parte desta lista.
+
+SP, Marília
